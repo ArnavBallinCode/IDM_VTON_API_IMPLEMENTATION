@@ -39,17 +39,4 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Results and temporary files
-examples/results/*.png
-examples/results/*.jpg
-*.tmp
-temp/
-
-# Allow example input images but exclude results
-!examples/person_images/
-!examples/garment_images/
-!examples/person_images/*.jpg
-!examples/person_images/*.png
-!examples/garment_images/*.jpg
-!examples/garment_images/*.png
 
