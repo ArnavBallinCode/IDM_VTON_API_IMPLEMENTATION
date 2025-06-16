@@ -269,16 +269,41 @@ print(f'Inference time: {end_time - start_time:.2f} seconds')
 
 ## Usage
 
+### Project Structure
+
+```
+├── examples/
+│   ├── person_images/          # Input person photos
+│   │   ├── Arnav_A.jpg        # Example person 1
+│   │   ├── korean girl.png    # Example person 2
+│   │   └── will_smith.jpg     # Example person 3
+│   ├── garment_images/        # Input garment photos
+│   │   ├── gucci upper.jpg    # Example garment 1
+│   │   └── upper_2.jpg        # Example garment 2
+│   └── results/               # Generated outputs (auto-created)
+├── inference.py               # Main script
+├── .env.example              # Token template
+└── README.md                 # This file
+```
+
 ### Basic Usage
 
 1. **Prepare your images:**
-   - Place a person image in the directory (e.g., `person.jpg`)
-   - Place a garment image in the directory (e.g., `garment.jpg`)
+   ```bash
+   # Add your person images to:
+   examples/person_images/your_person.jpg
+   
+   # Add your garment images to:
+   examples/garment_images/your_garment.jpg
+   ```
 
 2. **Update the script:**
    - Open `inference.py`
-   - Update the file paths to your images
-   - Update the Hugging Face space name to yours
+   - Update the file paths to your images:
+   ```python
+   "background": handle_file("./examples/person_images/your_person.jpg"),
+   "garm_img": handle_file("./examples/garment_images/your_garment.jpg"),
+   ```
 
 3. **Run the script:**
    ```bash
@@ -286,25 +311,18 @@ print(f'Inference time: {end_time - start_time:.2f} seconds')
    python inference.py
    ```
 
-### Example
+### Example Workflows
 
+#### **Example 1: Arnav + Gucci Upper**
 ```python
-from gradio_client import Client, handle_file
-import os
-
-# Authentication
-hf_token = os.getenv("HUGGINGFACE_TOKEN")
-client = Client("your_username/IDM-VTON", hf_token=hf_token)
-
-# Inference
 result = client.predict(
     dict={
-        "background": handle_file("./person_image.jpg"),
+        "background": handle_file("./examples/person_images/Arnav_A.jpg"),
         "layers": [],
         "composite": None
     },
-    garm_img=handle_file("./garment_image.jpg"),
-    garment_des="Description of the garment",
+    garm_img=handle_file("./examples/garment_images/gucci upper.jpg"),
+    garment_des="Gucci upper garment",
     is_checked=True,
     is_checked_crop=False,
     denoise_steps=30,
@@ -312,6 +330,63 @@ result = client.predict(
     api_name="/tryon"
 )
 ```
+
+#### **Example 2: Korean Girl + Alternative Upper**
+```python
+result = client.predict(
+    dict={
+        "background": handle_file("./examples/person_images/korean girl.png"),
+        "layers": [],
+        "composite": None
+    },
+    garm_img=handle_file("./examples/garment_images/upper_2.jpg"),
+    garment_des="Stylish upper garment",
+    is_checked=True,
+    is_checked_crop=False,
+    denoise_steps=30,
+    seed=42,
+    api_name="/tryon"
+)
+```
+
+#### **Example 3: Will Smith + Gucci Upper**
+```python
+result = client.predict(
+    dict={
+        "background": handle_file("./examples/person_images/will_smith.jpg"),
+        "layers": [],
+        "composite": None
+    },
+    garm_img=handle_file("./examples/garment_images/gucci upper.jpg"),
+    garment_des="Gucci upper on Will Smith",
+    is_checked=True,
+    is_checked_crop=False,
+    denoise_steps=30,
+    seed=42,
+    api_name="/tryon"
+)
+```
+
+### Available Examples
+
+#### **Person Images** (`examples/person_images/`)
+| Image | Description | Best For |
+|-------|-------------|----------|
+| `Arnav_A.jpg` | Young male, front-facing | Casual wear, formal shirts |
+| `korean girl.png` | Young female, clear background | Fashion items, dresses |
+| `will_smith.jpg` | Male celebrity, professional photo | Formal wear, jackets |
+
+#### **Garment Images** (`examples/garment_images/`)
+| Image | Description | Type |
+|-------|-------------|------|
+| `gucci upper.jpg` | Luxury brand upper garment | Premium shirt/top |
+| `upper_2.jpg` | Alternative upper garment | Casual/formal shirt |
+
+### Result Management
+
+Results are automatically saved to `examples/results/` with timestamps:
+- `result_tryon_[timestamp].png` - Main virtual try-on result
+- `result_mask_[timestamp].png` - Processing mask (optional)
 
 ## Quick Start Guide
 
@@ -345,12 +420,21 @@ python inference.py
 ## File Structure
 
 ```
-├── inference.py          # Main inference script
-├── README.md            # This file
-├── Arnav_A.jpg          # Person image (example)
-├── gucci upper.jpg      # Garment image (example)
-├── result_tryon_*.png   # Generated try-on results
-└── result_mask_*.png    # Generated mask outputs
+├── examples/
+│   ├── person_images/          # Input person photos
+│   │   ├── Arnav_A.jpg        # Example: Young male, front-facing
+│   │   ├── korean girl.png    # Example: Young female, clear background  
+│   │   └── will_smith.jpg     # Example: Male celebrity, professional
+│   ├── garment_images/        # Input garment photos
+│   │   ├── gucci upper.jpg    # Example: Luxury brand upper garment
+│   │   └── upper_2.jpg        # Example: Alternative upper garment
+│   └── results/               # Generated outputs (auto-created)
+│       ├── result_tryon_*.png # Virtual try-on results
+│       └── result_mask_*.png  # Processing masks
+├── inference.py               # Main inference script
+├── .env.example              # Environment variable template
+├── .gitignore                # Git ignore rules
+└── README.md                 # This documentation
 ```
 
 ## Parameters
@@ -441,3 +525,27 @@ For issues with:
 ---
 
 **Happy Virtual Try-On! 👕✨**
+
+### Interactive Example Runner
+
+For easy testing of all combinations, use the interactive example runner:
+
+```bash
+# Run the interactive example menu
+python run_examples.py
+
+# Available options:
+# 1. Arnav + Gucci upper
+# 2. Korean girl + Gucci upper  
+# 3. Will Smith + Gucci upper
+# 4. Arnav + Alternative upper
+# 5. Korean girl + Alternative upper
+# all - Run all examples
+# q - Quit
+```
+
+The runner will:
+- ✅ Automatically check for required files
+- ⏱️ Show processing time for each example
+- 📁 Save results with meaningful names
+- 🎯 Run individual or all examples with one command

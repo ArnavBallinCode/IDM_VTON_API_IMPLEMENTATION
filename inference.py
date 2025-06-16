@@ -24,11 +24,11 @@ client = Client("blackmamba2408/IDM-VTON", hf_token=hf_token)
 
 result = client.predict(
     dict={
-        "background": handle_file("/Users/arnavangarkar/Desktop/Arnav/VITON/Yisol idm/Arnav_A.jpg"),
+        "background": handle_file("./examples/person_images/Arnav_A.jpg"),
         "layers": [],  # No manual mask
         "composite": None
     },
-    garm_img=handle_file("/Users/arnavangarkar/Desktop/Arnav/VITON/Yisol idm/gucci upper.jpg"),
+    garm_img=handle_file("./examples/garment_images/gucci upper.jpg"),
     garment_des="Gucci upper garment",
     is_checked=True,
     is_checked_crop=False,
