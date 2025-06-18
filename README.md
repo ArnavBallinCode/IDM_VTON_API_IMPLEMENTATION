@@ -85,16 +85,24 @@ Professional photo with alternative garment - perfect for formal wear demonstrat
 - `Arnav_A.jpg` - Young male, front-facing, ideal for casual/formal wear
 - `korean girl.png` - Female model, clean background, perfect for fashion items
 - `will_smith.jpg` - Male celebrity, professional photo, great for formal wear
+- `Full Man.jpg` - **NEW!** Full body male model, perfect for complete outfits
 
 **👕 Garment Images:**
 - `gucci upper.jpg` - Premium luxury brand upper garment
 - `upper_2.jpg` - Alternative stylish upper garment option
+- `upper_3.jpg` - **NEW!** Red checkered shirt, casual style
+- `pants.jpg` - **NEW!** Dark cargo pants, lower body garment
+
+### New Combinations Available! 🆕
+✨ **Upper Body**: Red checkered shirt on any person  
+✨ **Lower Body**: Dark cargo pants (works with virtual-try-on!)  
+✨ **Full Body**: Complete outfit combinations with Full Man model  
 
 ### Quick Demo
 ```bash
 # Try it yourself in 30 seconds!
-python run_examples.py
-# Choose option 1-5 or 'all' to see the magic ✨
+python two_step_pipeline.py
+# Choose option 1-8 or 'all' to see the magic ✨
 ```
 
 ## Overview
@@ -369,16 +377,23 @@ print(f'Inference time: {end_time - start_time:.2f} seconds')
 ```
 ├── examples/
 │   ├── person_images/          # Input person photos
-│   │   ├── Arnav_A.jpg        # Example person 1
-│   │   ├── korean girl.png    # Example person 2
-│   │   └── will_smith.jpg     # Example person 3
+│   │   ├── Arnav_A.jpg        # Young male, front-facing
+│   │   ├── korean girl.png    # Female model, clean background
+│   │   ├── will_smith.jpg     # Male celebrity, professional
+│   │   └── Full Man.jpg       # 🆕 Full body male model
 │   ├── garment_images/        # Input garment photos
-│   │   ├── gucci upper.jpg    # Example garment 1
-│   │   └── upper_2.jpg        # Example garment 2
+│   │   ├── gucci upper.jpg    # Luxury brand upper garment
+│   │   ├── upper_2.jpg        # Alternative upper garment
+│   │   ├── upper_3.jpg        # 🆕 Red checkered shirt
+│   │   └── pants.jpg          # 🆕 Dark cargo pants
 │   └── results/               # Generated outputs (auto-created)
-├── inference.py               # Main script
+├── inference.py               # Main script (supports both modes)
+├── two_step_pipeline.py       # Advanced two-step pipeline
+├── run_examples.py            # Interactive example runner
+├── layered_pipeline.py        # NEW: Sequential layered try-on
 ├── .env.example              # Token template
-└── README.md                 # This file
+├── .gitignore                # Git ignore rules
+└── README.md                 # This documentation
 ```
 
 ### Basic Usage
@@ -461,6 +476,38 @@ result = client.predict(
     api_name="/tryon"
 )
 ```
+
+### 🆕 New Example Combinations
+
+With the new assets, you can now try:
+
+#### **Upper Body Combinations:**
+```bash
+# Example 5: Full Man + Red Checkered Shirt
+python two_step_pipeline.py  # Select option 5
+
+# Example 8: Korean Girl + Red Checkered Shirt  
+python two_step_pipeline.py  # Select option 8
+```
+
+#### **Lower Body Combinations (NEW!):**
+```bash
+# Example 6: Full Man + Dark Cargo Pants
+python two_step_pipeline.py  # Select option 6
+
+# Example 7: Arnav + Dark Cargo Pants
+python two_step_pipeline.py  # Select option 7
+```
+
+#### **Available Example Matrix:**
+| Person | Upper Garments | Lower Garments |
+|--------|---------------|----------------|
+| **Arnav_A** | ✅ Gucci, ✅ Upper_2, ✅ Upper_3 | ✅ Pants |
+| **Korean Girl** | ✅ Gucci, ✅ Upper_2, ✅ Upper_3 | ✅ Pants |
+| **Will Smith** | ✅ Gucci, ✅ Upper_2, ✅ Upper_3 | ✅ Pants |
+| **Full Man** | ✅ Gucci, ✅ Upper_2, ✅ Upper_3 | ✅ Pants |
+
+**Total Combinations**: 16 possible try-on combinations! 🎯
 
 ### Available Examples
 
@@ -628,3 +675,64 @@ The runner will:
 - ⏱️ Show processing time for each example
 - 📁 Save results with meaningful names
 - 🎯 Run individual or all examples with one command
+
+## 🔄 Two-Step Pipeline Approach
+
+This project now supports an advanced **two-step pipeline** for superior results:
+
+### Step 1: Initial Processing
+- **Model**: `blackmamba2408/virtual-try-on`
+- **Purpose**: Initial garment fitting and pose alignment
+- **API**: `/virtual_tryon`
+- **Speed**: Fast initial processing
+- **Output**: Base virtual try-on result
+
+### Step 2: Refinement
+- **Model**: `blackmamba2408/IDM-VTON` 
+- **Purpose**: High-quality refinement and detail enhancement
+- **API**: `/tryon`
+- **Features**: Advanced diffusion-based improvements
+- **Output**: Professional-grade final result
+
+### Pipeline Benefits
+✅ **Better Quality**: Two-stage processing for superior results  
+✅ **Flexibility**: Choose single-step or two-step approach  
+✅ **Optimized**: Each model handles what it does best  
+✅ **Robust**: Fallback options if one step fails  
+
+### Usage Options
+
+**Option 1: Two-Step Pipeline (Recommended)**
+```bash
+python two_step_pipeline.py
+# Interactive menu with all examples
+```
+
+**Option 2: Configure in inference.py**
+```python
+USE_TWO_STEP = True  # Enable two-step pipeline
+USE_TWO_STEP = False # Direct IDM-VTON only
+```
+
+**Option 3: Direct IDM-VTON**
+```bash
+python inference.py  # Uses current configuration
+```
+
+### 🔀 All Available Approaches
+
+| Approach | Speed | Quality | Use Case | Command |
+|----------|--------|---------|----------|---------|
+| **🆕 Layered Pipeline** | Slower | ⭐⭐⭐⭐⭐ | Complete outfits | `python layered_pipeline.py` |
+| **Two-Step Pipeline** | Medium | ⭐⭐⭐⭐⭐ | Single garment refinement | `python two_step_pipeline.py` |
+| **Direct IDM-VTON** | Fast | ⭐⭐⭐⭐ | Quick single garment | `python inference.py` |
+| **Virtual-Try-On Only** | Fastest | ⭐⭐⭐ | Preview/testing | Direct API call |
+
+### 🎯 Which Should You Use?
+
+- **👔 Complete Outfits**: Use `layered_pipeline.py` - applies pants first, then upper garment
+- **👕 Single Garment**: Use `two_step_pipeline.py` - refines single garment quality  
+- **⚡ Quick Tests**: Use `inference.py` - fast single garment application
+
+**🏆 Best Quality**: Layered Pipeline for complete outfits!
+**⚡ Best Speed**: Direct inference for single garments!
