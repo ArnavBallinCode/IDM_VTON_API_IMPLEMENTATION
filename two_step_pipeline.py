@@ -167,81 +167,353 @@ def run_two_step_pipeline(person_path, garment_path, garment_description, garmen
 EXAMPLES = {
     "1": {
         "person": "./examples/person_images/Arnav_A.jpg",
-        "garment": "./examples/garment_images/gucci upper.jpg",
+        "garment": "./examples/garment_images/shirts/gucci upper.jpg",
         "description": "Gucci upper garment refined with IDM-VTON",
         "type": "upper_body"
     },
     "2": {
         "person": "./examples/person_images/korean girl.png", 
-        "garment": "./examples/garment_images/gucci upper.jpg",
+        "garment": "./examples/garment_images/shirts/gucci upper.jpg",
         "description": "Gucci upper garment for Korean girl",
         "type": "upper_body"
     },
     "3": {
         "person": "./examples/person_images/will_smith.jpg",
-        "garment": "./examples/garment_images/gucci upper.jpg", 
+        "garment": "./examples/garment_images/shirts/gucci upper.jpg", 
         "description": "Gucci upper garment for Will Smith",
         "type": "upper_body"
     },
     "4": {
         "person": "./examples/person_images/Arnav_A.jpg",
-        "garment": "./examples/garment_images/upper_2.jpg",
+        "garment": "./examples/garment_images/shirts/upper_2.jpg",
         "description": "Alternative upper garment for Arnav",
         "type": "upper_body"
     },
     "5": {
         "person": "./examples/person_images/Full Man.jpg",
-        "garment": "./examples/garment_images/upper_3.jpg",
-        "description": "Red checkered upper garment for Full Man",
+        "garment": "./examples/garment_images/shirts/upper_2.jpg",
+        "description": "Alternative upper garment for Full Man",
         "type": "upper_body"
     },
     "6": {
         "person": "./examples/person_images/Full Man.jpg",
-        "garment": "./examples/garment_images/pants.jpg",
+        "garment": "./examples/garment_images/pants/pants.jpg",
         "description": "Dark cargo pants for Full Man",
         "type": "lower_body"
     },
     "7": {
         "person": "./examples/person_images/Arnav_A.jpg",
-        "garment": "./examples/garment_images/pants.jpg",
+        "garment": "./examples/garment_images/pants/pants.jpg",
         "description": "Dark cargo pants for Arnav",
         "type": "lower_body"
     },
     "8": {
         "person": "./examples/person_images/korean girl.png",
-        "garment": "./examples/garment_images/upper_3.jpg",
-        "description": "Red checkered shirt for Korean girl",
+        "garment": "./examples/garment_images/shirts/upper_2.jpg",
+        "description": "Alternative upper garment for Korean girl",
         "type": "upper_body"
+    },
+    "9": {
+        "person": "./examples/person_images/Joe.jpg",
+        "garment": "./examples/garment_images/shirts/gucci upper.jpg",
+        "description": "Gucci upper garment for Joe",
+        "type": "upper_body"
+    },
+    "10": {
+        "person": "./examples/person_images/Joe.jpg",
+        "garment": "./examples/garment_images/shirts/upper_2.jpg",
+        "description": "Alternative upper garment for Joe",
+        "type": "upper_body"
+    },
+    "11": {
+        "person": "./examples/person_images/Joe.jpg",
+        "garment": "./examples/garment_images/pants/pants.jpg",
+        "description": "Dark cargo pants for Joe",
+        "type": "lower_body"
     }
 }
 
+def auto_process_new_garment(garment_path, garment_type):
+    """Auto-process new garment by moving it to appropriate folder"""
+    garment_images_dir = Path("./examples/garment_images")
+    filename = Path(garment_path).name
+    
+    if garment_type == "upper_body":
+        dest_dir = garment_images_dir / "shirts"
+        dest_path = dest_dir / filename
+    else:  # lower_body
+        dest_dir = garment_images_dir / "pants"
+        dest_path = dest_dir / filename
+    
+    # Create directory if it doesn't exist
+    dest_dir.mkdir(exist_ok=True)
+    
+    # Copy the file if it's not already in the right place
+    if not dest_path.exists():
+        shutil.copy(garment_path, dest_path)
+        print(f"✅ New garment auto-processed and saved to: {dest_path}")
+    
+    return str(dest_path)
+
+def list_available_items():
+    """List all available persons and garments"""
+    person_dir = Path("./examples/person_images")
+    shirts_dir = Path("./examples/garment_images/shirts")
+    pants_dir = Path("./examples/garment_images/pants")
+    
+    # List persons
+    persons = []
+    if person_dir.exists():
+        persons = [f for f in person_dir.iterdir() if f.suffix.lower() in ['.jpg', '.jpeg', '.png']]
+    
+    # List shirts
+    shirts = []
+    if shirts_dir.exists():
+        shirts = [f for f in shirts_dir.iterdir() if f.suffix.lower() in ['.jpg', '.jpeg', '.png']]
+    
+    # List pants
+    pants = []
+    if pants_dir.exists():
+        pants = [f for f in pants_dir.iterdir() if f.suffix.lower() in ['.jpg', '.jpeg', '.png']]
+    
+    return persons, shirts, pants
+
+def select_person():
+    """Interactive person selection"""
+    persons, _, _ = list_available_items()
+    
+    if not persons:
+        print("❌ No person images found in ./examples/person_images/")
+        custom_path = input("Enter custom person image path: ").strip()
+        if os.path.exists(custom_path):
+            return custom_path
+        else:
+            print("❌ File not found!")
+            return None
+    
+    print("\n👤 Available Persons:")
+    for i, person in enumerate(persons, 1):
+        print(f"{i}. {person.stem}")
+    
+    print(f"{len(persons) + 1}. Add new person image")
+    
+    while True:
+        try:
+            choice = input(f"\nSelect person (1-{len(persons) + 1}): ").strip()
+            
+            if choice == str(len(persons) + 1):
+                custom_path = input("Enter new person image path: ").strip()
+                if os.path.exists(custom_path):
+                    # Copy to person images folder
+                    filename = Path(custom_path).name
+                    dest_path = Path("./examples/person_images") / filename
+                    shutil.copy(custom_path, dest_path)
+                    print(f"✅ New person image added: {dest_path}")
+                    return str(dest_path)
+                else:
+                    print("❌ File not found!")
+                    continue
+            
+            choice_idx = int(choice) - 1
+            if 0 <= choice_idx < len(persons):
+                return str(persons[choice_idx])
+            else:
+                print(f"❌ Please enter a number between 1 and {len(persons) + 1}")
+        except ValueError:
+            print("❌ Please enter a valid number")
+
+def select_shirt():
+    """Interactive shirt selection"""
+    _, shirts, _ = list_available_items()
+    
+    print("\n👕 Select Shirt:")
+    print("1. Choose from available shirts")
+    print("2. Add new shirt")
+    print("3. Skip shirt")
+    
+    while True:
+        try:
+            choice = input("\nSelect option (1-3): ").strip()
+            
+            if choice == "3":
+                return None, None, None
+            
+            elif choice == "2":
+                custom_path = input("Enter new shirt image path: ").strip()
+                if not os.path.exists(custom_path):
+                    print("❌ File not found!")
+                    continue
+                
+                processed_path = auto_process_new_garment(custom_path, "upper_body")
+                description = input("Enter shirt description: ").strip() or "Custom shirt"
+                return processed_path, description, "upper_body"
+            
+            elif choice == "1":
+                if not shirts:
+                    print("❌ No shirts found. Please add one or skip.")
+                    continue
+                
+                print("\n👕 Available Shirts:")
+                for i, shirt in enumerate(shirts, 1):
+                    print(f"{i}. {shirt.stem}")
+                
+                shirt_choice = input(f"Select shirt (1-{len(shirts)}): ").strip()
+                shirt_idx = int(shirt_choice) - 1
+                
+                if 0 <= shirt_idx < len(shirts):
+                    selected_shirt = str(shirts[shirt_idx])
+                    description = input("Enter shirt description: ").strip() or f"{shirts[shirt_idx].stem} shirt"
+                    return selected_shirt, description, "upper_body"
+                else:
+                    print(f"❌ Please enter a number between 1 and {len(shirts)}")
+            
+            else:
+                print("❌ Please enter 1, 2, or 3")
+                
+        except ValueError:
+            print("❌ Please enter a valid number")
+
+def select_pants():
+    """Interactive pants selection"""
+    _, _, pants = list_available_items()
+    
+    print("\n👖 Select Pants:")
+    print("1. Choose from available pants")
+    print("2. Add new pants")
+    print("3. Skip pants")
+    
+    while True:
+        try:
+            choice = input("\nSelect option (1-3): ").strip()
+            
+            if choice == "3":
+                return None, None, None
+            
+            elif choice == "2":
+                custom_path = input("Enter new pants image path: ").strip()
+                if not os.path.exists(custom_path):
+                    print("❌ File not found!")
+                    continue
+                
+                processed_path = auto_process_new_garment(custom_path, "lower_body")
+                description = input("Enter pants description: ").strip() or "Custom pants"
+                return processed_path, description, "lower_body"
+            
+            elif choice == "1":
+                if not pants:
+                    print("❌ No pants found. Please add one or skip.")
+                    continue
+                
+                print("\n👖 Available Pants:")
+                for i, pant in enumerate(pants, 1):
+                    print(f"{i}. {pant.stem}")
+                
+                pant_choice = input(f"Select pants (1-{len(pants)}): ").strip()
+                pant_idx = int(pant_choice) - 1
+                
+                if 0 <= pant_idx < len(pants):
+                    selected_pants = str(pants[pant_idx])
+                    description = input("Enter pants description: ").strip() or f"{pants[pant_idx].stem} pants"
+                    return selected_pants, description, "lower_body"
+                else:
+                    print(f"❌ Please enter a number between 1 and {len(pants)}")
+            
+            else:
+                print("❌ Please enter 1, 2, or 3")
+                
+        except ValueError:
+            print("❌ Please enter a valid number")
+
+def select_garment():
+    """Interactive garment selection - LEGACY FUNCTION"""
+    _, shirts, pants = list_available_items()
+    
+    print("\n👕 Select Garment Type:")
+    print("1. Shirts/Upper Body")
+    print("2. Pants/Lower Body")
+    print("3. Add new garment")
+    
+    while True:
+        try:
+            type_choice = input("\nSelect type (1-3): ").strip()
+            
+            if type_choice == "3":
+                custom_path = input("Enter new garment image path: ").strip()
+                if not os.path.exists(custom_path):
+                    print("❌ File not found!")
+                    continue
+                
+                garment_type_input = input("Is this upper_body or lower_body? [upper_body]: ").strip() or "upper_body"
+                processed_path = auto_process_new_garment(custom_path, garment_type_input)
+                description = input("Enter garment description: ").strip() or "Custom garment"
+                return processed_path, description, garment_type_input
+            
+            elif type_choice == "1":
+                if not shirts:
+                    print("❌ No shirts found. Please add one.")
+                    continue
+                
+                print("\n👕 Available Shirts:")
+                for i, shirt in enumerate(shirts, 1):
+                    print(f"{i}. {shirt.stem}")
+                
+                shirt_choice = input(f"Select shirt (1-{len(shirts)}): ").strip()
+                shirt_idx = int(shirt_choice) - 1
+                
+                if 0 <= shirt_idx < len(shirts):
+                    selected_shirt = str(shirts[shirt_idx])
+                    description = input("Enter shirt description: ").strip() or f"{shirts[shirt_idx].stem} shirt"
+                    return selected_shirt, description, "upper_body"
+                else:
+                    print(f"❌ Please enter a number between 1 and {len(shirts)}")
+            
+            elif type_choice == "2":
+                if not pants:
+                    print("❌ No pants found. Please add one.")
+                    continue
+                
+                print("\n👖 Available Pants:")
+                for i, pant in enumerate(pants, 1):
+                    print(f"{i}. {pant.stem}")
+                
+                pant_choice = input(f"Select pants (1-{len(pants)}): ").strip()
+                pant_idx = int(pant_choice) - 1
+                
+                if 0 <= pant_idx < len(pants):
+                    selected_pants = str(pants[pant_idx])
+                    description = input("Enter pants description: ").strip() or f"{pants[pant_idx].stem} pants"
+                    return selected_pants, description, "lower_body"
+                else:
+                    print(f"❌ Please enter a number between 1 and {len(pants)}")
+            
+            else:
+                print("❌ Please enter 1, 2, or 3")
+                
+        except ValueError:
+            print("❌ Please enter a valid number")
+
 def main():
-    """Interactive menu for running examples"""
+    """Interactive virtual try-on interface"""
     print("\n" + "="*60)
     print("🎭 Two-Step Virtual Try-On Pipeline")
     print("Step 1: virtual-try-on → Step 2: IDM-VTON")
     print("="*60)
     
-    print("\nAvailable Examples:")
-    for key, example in EXAMPLES.items():
-        person_name = Path(example['person']).stem
-        garment_name = Path(example['garment']).stem
-        print(f"{key}. {person_name} + {garment_name}")
-    
-    print("\nCommands:")
-    print("• Enter example number (1-8) to run")
-    print("• 'all' to run all examples")
-    print("• 'custom' to use custom images")
-    print("• 'q' to quit")
-    
     while True:
-        choice = input("\nEnter your choice: ").strip().lower()
+        print("\n🎯 Main Menu:")
+        print("1. Start Complete Outfit Try-On (Shirt + Pants)")
+        print("2. Start Single Garment Try-On")
+        print("3. Run All Examples (Legacy)")
+        print("4. Quit")
         
-        if choice == 'q':
+        choice = input("\nSelect option (1-4): ").strip()
+        
+        if choice == "4":
             print("👋 Goodbye!")
             break
-        elif choice == 'all':
-            print("🚀 Running all examples...")
+        
+        elif choice == "3":
+            print("🚀 Running all predefined examples...")
             for key, example in EXAMPLES.items():
                 print(f"\n{'='*40}")
                 print(f"Running Example {key}")
@@ -253,23 +525,106 @@ def main():
                     example['type']
                 )
                 print("-" * 40)
-        elif choice == 'custom':
-            person_path = input("Enter person image path: ").strip()
-            garment_path = input("Enter garment image path: ").strip()
-            description = input("Enter garment description: ").strip()
-            garment_type = input("Enter garment type (upper_body/lower_body/dresses) [upper_body]: ").strip() or "upper_body"
+        
+        elif choice == "2":
+            print("\n🎬 Starting Single Garment Try-On...")
             
-            run_two_step_pipeline(person_path, garment_path, description, garment_type)
-        elif choice in EXAMPLES:
-            example = EXAMPLES[choice]
-            run_two_step_pipeline(
-                example['person'], 
-                example['garment'], 
-                example['description'],
-                example['type']
-            )
+            # Step 1: Select person
+            person_path = select_person()
+            if not person_path:
+                continue
+            
+            # Step 2: Select single garment (legacy function)
+            garment_result = select_garment()
+            if not garment_result:
+                continue
+            
+            garment_path, description, garment_type = garment_result
+            
+            # Step 3: Confirm and run
+            print(f"\n✅ Configuration:")
+            print(f"Person: {Path(person_path).name}")
+            print(f"Garment: {Path(garment_path).name}")
+            print(f"Description: {description}")
+            print(f"Type: {garment_type}")
+            
+            confirm = input("\nProceed with virtual try-on? (y/n) [y]: ").strip().lower() or "y"
+            
+            if confirm == "y":
+                run_two_step_pipeline(person_path, garment_path, description, garment_type)
+            else:
+                print("❌ Try-on cancelled.")
+        
+        elif choice == "1":
+            print("\n🎬 Starting Complete Outfit Try-On...")
+            
+            # Step 1: Select person
+            person_path = select_person()
+            if not person_path:
+                continue
+            
+            # Step 2: Select shirt
+            print(f"\n👤 Selected person: {Path(person_path).name}")
+            shirt_result = select_shirt()
+            
+            # Step 3: Select pants
+            pants_result = select_pants()
+            
+            # Check if at least one garment is selected
+            if not shirt_result[0] and not pants_result[0]:
+                print("❌ You must select at least one garment (shirt or pants)!")
+                continue
+            
+            # Process selected garments
+            garments_to_process = []
+            
+            if shirt_result[0]:  # If shirt is selected
+                garments_to_process.append({
+                    'path': shirt_result[0],
+                    'description': shirt_result[1],
+                    'type': shirt_result[2],
+                    'name': 'Shirt'
+                })
+            
+            if pants_result[0]:  # If pants is selected
+                garments_to_process.append({
+                    'path': pants_result[0],
+                    'description': pants_result[1],
+                    'type': pants_result[2],
+                    'name': 'Pants'
+                })
+            
+            # Show configuration
+            print(f"\n✅ Complete Outfit Configuration:")
+            print(f"Person: {Path(person_path).name}")
+            for i, garment in enumerate(garments_to_process, 1):
+                print(f"{garment['name']}: {Path(garment['path']).name} - {garment['description']}")
+            
+            confirm = input(f"\nProceed with {len(garments_to_process)} garment(s) try-on? (y/n) [y]: ").strip().lower() or "y"
+            
+            if confirm == "y":
+                # Process each garment
+                for i, garment in enumerate(garments_to_process, 1):
+                    print(f"\n{'='*50}")
+                    print(f"Processing {garment['name']} ({i}/{len(garments_to_process)})")
+                    print('='*50)
+                    
+                    run_two_step_pipeline(
+                        person_path, 
+                        garment['path'], 
+                        garment['description'], 
+                        garment['type']
+                    )
+                    
+                    if i < len(garments_to_process):
+                        input("\n⏸️  Press Enter to continue to next garment...")
+                
+                print(f"\n🎉 Complete outfit try-on finished! Check results folder.")
+            else:
+                print("❌ Try-on cancelled.")
+        
         else:
-            print("❌ Invalid choice. Please enter 1-4, 'all', 'custom', or 'q'")
+            print("❌ Invalid choice. Please enter 1, 2, 3, or 4")
 
 if __name__ == "__main__":
     main()
